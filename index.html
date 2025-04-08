@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        .calculator {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .calculator h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #3498db;
+        }
+        .result p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        .warning {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 24px;
+            }
+            .calculator h2 {
+                font-size: 20px;
+            }
+            .calculator {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Financial Calculator</h1>
+    
+    <section class="calculator">
+        <h2>Percentage Calculator</h2>
+        <div class="input-group">
+            <label for="amount">Dollar Amount ($)</label>
+            <input type="number" id="amount" placeholder="Enter dollar amount" min="0" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="percentage">Percentage (%)</label>
+            <input type="number" id="percentage" placeholder="Enter percentage" min="0" max="100" step="0.01">
+        </div>
+        <button onclick="calculatePercentage()">Calculate</button>
+        <div class="result" id="percentageResult" style="display: none;">
+            <p><span id="percentageText"></span>: <span class="result-value" id="percentageValue"></span></p>
+        </div>
+    </section>
+    
+    <section class="calculator">
+        <h2>Payment Splitter</h2>
+        <div class="input-group">
+            <label for="paymentAmount">Total Balance ($)</label>
+            <input type="number" id="paymentAmount" placeholder="Enter total balance" min="0" step="0.01">
+        </div>
+        <button onclick="calculatePayments()">Calculate Payment Plans</button>
+        <div class="result" id="paymentsResult" style="display: none;">
+            <p>Payment plans to reach the total balance:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time Period</th>
+                        <th>Monthly Payment</th>
+                        <th>Total Payments</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="thirtyRow">
+                        <td>30 days (1 month)</td>
+                        <td id="thirtyPayment">$0.00</td>
+                        <td id="thirtyTotal">$0.00</td>
+                    </tr>
+                    <tr id="sixtyRow">
+                        <td>60 days (2 months)</td>
+                        <td id="sixtyPayment">$0.00</td>
+                        <td id="sixtyTotal">$0.00</td>
+                    </tr>
+                    <tr id="ninetyRow">
+                        <td>90 days (3 months)</td>
+                        <td id="ninetyPayment">$0.00</td>
+                        <td id="ninetyTotal">$0.00</td>
+                    </tr>
+                    <tr id="yearRow">
+                        <td>1 year (12 months)</td>
+                        <td id="yearPayment">$0.00</td>
+                        <td id="yearTotal">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p id="warningMessage" class="warning" style="display: none; margin-top: 15px;"></p>
+        </div>
+    </section>
+
+    <script>
+        function calculatePercentage() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const percentage = parseFloat(document.getElementById('percentage').value);
+            
+            if (isNaN(amount) || isNaN(percentage)) {
+                alert('Please enter valid numbers for both fields');
+                return;
+            }
+            
+            const result = amount * (percentage / 100);
+            
+            document.getElementById('percentageText').textContent = `${percentage}% of $${amount.toFixed(2)}`;
+            document.getElementById('percentageValue').textContent = `$${result.toFixed(2)}`;
+            document.getElementById('percentageResult').style.display = 'block';
+        }
+        
+        function calculatePayments() {
+            const totalBalance = parseFloat(document.getElementById('paymentAmount').value);
+            const minMonthlyPayment = 50;
+            
+            if (isNaN(totalBalance)) {
+                alert('Please enter a valid dollar amount');
+                return;
+            }
+            
+            document.getElementById('warningMessage').style.display = 'none';
+            
+            // Calculate for 30 days (1 month)
+            const thirtyDaysPayment = totalBalance;
+            document.getElementById('thirtyPayment').textContent = `$${thirtyDaysPayment.toFixed(2)}`;
+            document.getElementById('thirtyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+            
+            // Calculate for 60 days (2 months)
+            const sixtyDaysPayment = totalBalance / 2;
+            document.getElementById('sixtyPayment').textContent = `$${sixtyDaysPayment.toFixed(2)}`;
+            document.getElementById('sixtyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+            
+            // Calculate for 90 days (3 months)
+            const ninetyDaysPayment = totalBalance / 3;
+            document.getElementById('ninetyPayment').textContent = `$${ninetyDaysPayment.toFixed(2)}`;
+            document.getElementById('ninetyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+            
+            // Calculate for 1 year (12 months)
+            const yearPayment = totalBalance / 12;
+            document.getElementById('yearPayment').textContent = `$${yearPayment.toFixed(2)}`;
+            document.getElementById('yearTotal').textContent = `$${totalBalance.toFixed(2)}`;
+            
+            // Check if any payment is below minimum and show warning
+            let warning = "";
+            
+            if (yearPayment < minMonthlyPayment) {
+                document.getElementById('yearRow').style.color = '#e74c3c';
+                warning += "• The 12-month plan falls below the $50 minimum monthly payment.<br>";
+            } else {
+                document.getElementById('yearRow').style.color = '';
+            }
+            
+            if (ninetyDaysPayment < minMonthlyPayment) {
+                document.getElementById('ninetyRow').style.color = '#e74c3c';
+                warning += "• The 3-month plan falls below the $50 minimum monthly payment.<br>";
+            } else {
+                document.getElementById('ninetyRow').style.color = '';
+            }
+            
+            if (sixtyDaysPayment < minMonthlyPayment) {
+                document.getElementById('sixtyRow').style.color = '#e74c3c';
+                warning += "• The 2-month plan falls below the $50 minimum monthly payment.<br>";
+            } else {
+                document.getElementById('sixtyRow').style.color = '';
+            }
+            
+            if (thirtyDaysPayment < minMonthlyPayment) {
+                document.getElementById('thirtyRow').style.color = '#e74c3c';
+                warning += "• The 1-month payment falls below the $50 minimum.<br>";
+            } else {
+                document.getElementById('thirtyRow').style.color = '';
+            }
+            
+            if (warning !== "") {
+                document.getElementById('warningMessage').innerHTML = "Warning:<br>" + warning;
+                document.getElementById('warningMessage').style.display = 'block';
+            }
+            
+            document.getElementById('paymentsResult').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
