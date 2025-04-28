@@ -44,7 +44,7 @@
             color: #2c3e50;
             font-weight: 500;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
@@ -98,6 +98,16 @@
             color: #e74c3c;
             font-weight: bold;
         }
+        .payment-frequency {
+            margin-top: 15px;
+            padding: 10px 0;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
         @media (max-width: 600px) {
             h1 {
                 font-size: 24px;
@@ -136,40 +146,120 @@
             <label for="paymentAmount">Total Balance ($)</label>
             <input type="number" id="paymentAmount" placeholder="Enter total balance" min="0" step="0.01">
         </div>
+        <div class="input-group">
+            <label for="paymentFrequency">Payment Frequency</label>
+            <select id="paymentFrequency">
+                <option value="monthly">Monthly</option>
+                <option value="biweekly">Bi-weekly (Every 2 weeks)</option>
+                <option value="weekly">Weekly</option>
+            </select>
+        </div>
         <button onclick="calculatePayments()">Calculate Payment Plans</button>
         <div class="result" id="paymentsResult" style="display: none;">
             <p>Payment plans to reach the total balance:</p>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Time Period</th>
-                        <th>Monthly Payment</th>
-                        <th>Total Payments</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr id="thirtyRow">
-                        <td>30 days (1 month)</td>
-                        <td id="thirtyPayment">$0.00</td>
-                        <td id="thirtyTotal">$0.00</td>
-                    </tr>
-                    <tr id="sixtyRow">
-                        <td>60 days (2 months)</td>
-                        <td id="sixtyPayment">$0.00</td>
-                        <td id="sixtyTotal">$0.00</td>
-                    </tr>
-                    <tr id="ninetyRow">
-                        <td>90 days (3 months)</td>
-                        <td id="ninetyPayment">$0.00</td>
-                        <td id="ninetyTotal">$0.00</td>
-                    </tr>
-                    <tr id="yearRow">
-                        <td>1 year (12 months)</td>
-                        <td id="yearPayment">$0.00</td>
-                        <td id="yearTotal">$0.00</td>
-                    </tr>
-                </tbody>
-            </table>
+            
+            <div class="tab-content active" id="monthlyTab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time Period</th>
+                            <th>Monthly Payment</th>
+                            <th>Total Payments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="thirtyRow">
+                            <td>30 days (1 month)</td>
+                            <td id="thirtyPayment">$0.00</td>
+                            <td id="thirtyTotal">$0.00</td>
+                        </tr>
+                        <tr id="sixtyRow">
+                            <td>60 days (2 months)</td>
+                            <td id="sixtyPayment">$0.00</td>
+                            <td id="sixtyTotal">$0.00</td>
+                        </tr>
+                        <tr id="ninetyRow">
+                            <td>90 days (3 months)</td>
+                            <td id="ninetyPayment">$0.00</td>
+                            <td id="ninetyTotal">$0.00</td>
+                        </tr>
+                        <tr id="yearRow">
+                            <td>1 year (12 months)</td>
+                            <td id="yearPayment">$0.00</td>
+                            <td id="yearTotal">$0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tab-content" id="biweeklyTab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time Period</th>
+                            <th>Bi-weekly Payment</th>
+                            <th>Total Payments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="thirtyBiweeklyRow">
+                            <td>30 days (2 payments)</td>
+                            <td id="thirtyBiweeklyPayment">$0.00</td>
+                            <td id="thirtyBiweeklyTotal">$0.00</td>
+                        </tr>
+                        <tr id="sixtyBiweeklyRow">
+                            <td>60 days (4 payments)</td>
+                            <td id="sixtyBiweeklyPayment">$0.00</td>
+                            <td id="sixtyBiweeklyTotal">$0.00</td>
+                        </tr>
+                        <tr id="ninetyBiweeklyRow">
+                            <td>90 days (6 payments)</td>
+                            <td id="ninetyBiweeklyPayment">$0.00</td>
+                            <td id="ninetyBiweeklyTotal">$0.00</td>
+                        </tr>
+                        <tr id="yearBiweeklyRow">
+                            <td>1 year (26 payments)</td>
+                            <td id="yearBiweeklyPayment">$0.00</td>
+                            <td id="yearBiweeklyTotal">$0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tab-content" id="weeklyTab">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time Period</th>
+                            <th>Weekly Payment</th>
+                            <th>Total Payments</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="thirtyWeeklyRow">
+                            <td>30 days (4 payments)</td>
+                            <td id="thirtyWeeklyPayment">$0.00</td>
+                            <td id="thirtyWeeklyTotal">$0.00</td>
+                        </tr>
+                        <tr id="sixtyWeeklyRow">
+                            <td>60 days (8 payments)</td>
+                            <td id="sixtyWeeklyPayment">$0.00</td>
+                            <td id="sixtyWeeklyTotal">$0.00</td>
+                        </tr>
+                        <tr id="ninetyWeeklyRow">
+                            <td>90 days (12 payments)</td>
+                            <td id="ninetyWeeklyPayment">$0.00</td>
+                            <td id="ninetyWeeklyTotal">$0.00</td>
+                        </tr>
+                        <tr id="yearWeeklyRow">
+                            <td>1 year (52 payments)</td>
+                            <td id="yearWeeklyPayment">$0.00</td>
+                            <td id="yearWeeklyTotal">$0.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
             <p id="warningMessage" class="warning" style="display: none; margin-top: 15px;"></p>
         </div>
     </section>
@@ -194,6 +284,7 @@
         function calculatePayments() {
             const totalBalance = parseFloat(document.getElementById('paymentAmount').value);
             const minMonthlyPayment = 50;
+            const frequency = document.getElementById('paymentFrequency').value;
             
             if (isNaN(totalBalance)) {
                 alert('Please enter a valid dollar amount');
@@ -202,55 +293,172 @@
             
             document.getElementById('warningMessage').style.display = 'none';
             
-            // Calculate for 30 days (1 month)
-            const thirtyDaysPayment = totalBalance;
-            document.getElementById('thirtyPayment').textContent = `$${thirtyDaysPayment.toFixed(2)}`;
-            document.getElementById('thirtyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+            // Hide all tabs first
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
             
-            // Calculate for 60 days (2 months)
-            const sixtyDaysPayment = totalBalance / 2;
-            document.getElementById('sixtyPayment').textContent = `$${sixtyDaysPayment.toFixed(2)}`;
-            document.getElementById('sixtyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+            // Show the selected tab
+            document.getElementById(`${frequency}Tab`).classList.add('active');
             
-            // Calculate for 90 days (3 months)
-            const ninetyDaysPayment = totalBalance / 3;
-            document.getElementById('ninetyPayment').textContent = `$${ninetyDaysPayment.toFixed(2)}`;
-            document.getElementById('ninetyTotal').textContent = `$${totalBalance.toFixed(2)}`;
-            
-            // Calculate for 1 year (12 months)
-            const yearPayment = totalBalance / 12;
-            document.getElementById('yearPayment').textContent = `$${yearPayment.toFixed(2)}`;
-            document.getElementById('yearTotal').textContent = `$${totalBalance.toFixed(2)}`;
-            
-            // Check if any payment is below minimum and show warning
             let warning = "";
-            
-            if (yearPayment < minMonthlyPayment) {
-                document.getElementById('yearRow').style.color = '#e74c3c';
-                warning += "• The 12-month plan falls below the $50 minimum monthly payment.<br>";
-            } else {
-                document.getElementById('yearRow').style.color = '';
+
+            // Calculate monthly payments
+            if (frequency === 'monthly') {
+                // Calculate for 30 days (1 month)
+                const thirtyDaysPayment = totalBalance;
+                document.getElementById('thirtyPayment').textContent = `$${thirtyDaysPayment.toFixed(2)}`;
+                document.getElementById('thirtyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 60 days (2 months)
+                const sixtyDaysPayment = totalBalance / 2;
+                document.getElementById('sixtyPayment').textContent = `$${sixtyDaysPayment.toFixed(2)}`;
+                document.getElementById('sixtyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 90 days (3 months)
+                const ninetyDaysPayment = totalBalance / 3;
+                document.getElementById('ninetyPayment').textContent = `$${ninetyDaysPayment.toFixed(2)}`;
+                document.getElementById('ninetyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 1 year (12 months)
+                const yearPayment = totalBalance / 12;
+                document.getElementById('yearPayment').textContent = `$${yearPayment.toFixed(2)}`;
+                document.getElementById('yearTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Check if any payment is below minimum and show warning
+                if (yearPayment < minMonthlyPayment) {
+                    document.getElementById('yearRow').style.color = '#e74c3c';
+                    warning += "• The 12-month plan falls below the $50 minimum monthly payment.<br>";
+                } else {
+                    document.getElementById('yearRow').style.color = '';
+                }
+                
+                if (ninetyDaysPayment < minMonthlyPayment) {
+                    document.getElementById('ninetyRow').style.color = '#e74c3c';
+                    warning += "• The 3-month plan falls below the $50 minimum monthly payment.<br>";
+                } else {
+                    document.getElementById('ninetyRow').style.color = '';
+                }
+                
+                if (sixtyDaysPayment < minMonthlyPayment) {
+                    document.getElementById('sixtyRow').style.color = '#e74c3c';
+                    warning += "• The 2-month plan falls below the $50 minimum monthly payment.<br>";
+                } else {
+                    document.getElementById('sixtyRow').style.color = '';
+                }
+                
+                if (thirtyDaysPayment < minMonthlyPayment) {
+                    document.getElementById('thirtyRow').style.color = '#e74c3c';
+                    warning += "• The 1-month payment falls below the $50 minimum.<br>";
+                } else {
+                    document.getElementById('thirtyRow').style.color = '';
+                }
             }
-            
-            if (ninetyDaysPayment < minMonthlyPayment) {
-                document.getElementById('ninetyRow').style.color = '#e74c3c';
-                warning += "• The 3-month plan falls below the $50 minimum monthly payment.<br>";
-            } else {
-                document.getElementById('ninetyRow').style.color = '';
+            // Calculate bi-weekly payments
+            else if (frequency === 'biweekly') {
+                const minBiweeklyPayment = minMonthlyPayment / 2.17; // Converting monthly min to biweekly
+                
+                // Calculate for 30 days (2 payments)
+                const thirtyBiweeklyPayment = totalBalance / 2;
+                document.getElementById('thirtyBiweeklyPayment').textContent = `$${thirtyBiweeklyPayment.toFixed(2)}`;
+                document.getElementById('thirtyBiweeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 60 days (4 payments)
+                const sixtyBiweeklyPayment = totalBalance / 4;
+                document.getElementById('sixtyBiweeklyPayment').textContent = `$${sixtyBiweeklyPayment.toFixed(2)}`;
+                document.getElementById('sixtyBiweeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 90 days (6 payments)
+                const ninetyBiweeklyPayment = totalBalance / 6;
+                document.getElementById('ninetyBiweeklyPayment').textContent = `$${ninetyBiweeklyPayment.toFixed(2)}`;
+                document.getElementById('ninetyBiweeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 1 year (26 payments)
+                const yearBiweeklyPayment = totalBalance / 26;
+                document.getElementById('yearBiweeklyPayment').textContent = `$${yearBiweeklyPayment.toFixed(2)}`;
+                document.getElementById('yearBiweeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Check if any payment is below minimum
+                if (yearBiweeklyPayment < minBiweeklyPayment) {
+                    document.getElementById('yearBiweeklyRow').style.color = '#e74c3c';
+                    warning += "• The 1-year bi-weekly plan falls below the minimum payment (equivalent to $50/month).<br>";
+                } else {
+                    document.getElementById('yearBiweeklyRow').style.color = '';
+                }
+                
+                if (ninetyBiweeklyPayment < minBiweeklyPayment) {
+                    document.getElementById('ninetyBiweeklyRow').style.color = '#e74c3c';
+                    warning += "• The 90-day bi-weekly plan falls below the minimum payment.<br>";
+                } else {
+                    document.getElementById('ninetyBiweeklyRow').style.color = '';
+                }
+                
+                if (sixtyBiweeklyPayment < minBiweeklyPayment) {
+                    document.getElementById('sixtyBiweeklyRow').style.color = '#e74c3c';
+                    warning += "• The 60-day bi-weekly plan falls below the minimum payment.<br>";
+                } else {
+                    document.getElementById('sixtyBiweeklyRow').style.color = '';
+                }
+                
+                if (thirtyBiweeklyPayment < minBiweeklyPayment) {
+                    document.getElementById('thirtyBiweeklyRow').style.color = '#e74c3c';
+                    warning += "• The 30-day bi-weekly plan falls below the minimum payment.<br>";
+                } else {
+                    document.getElementById('thirtyBiweeklyRow').style.color = '';
+                }
             }
-            
-            if (sixtyDaysPayment < minMonthlyPayment) {
-                document.getElementById('sixtyRow').style.color = '#e74c3c';
-                warning += "• The 2-month plan falls below the $50 minimum monthly payment.<br>";
-            } else {
-                document.getElementById('sixtyRow').style.color = '';
-            }
-            
-            if (thirtyDaysPayment < minMonthlyPayment) {
-                document.getElementById('thirtyRow').style.color = '#e74c3c';
-                warning += "• The 1-month payment falls below the $50 minimum.<br>";
-            } else {
-                document.getElementById('thirtyRow').style.color = '';
+            // Calculate weekly payments
+            else if (frequency === 'weekly') {
+                const minWeeklyPayment = minMonthlyPayment / 4.33; // Converting monthly min to weekly
+                
+                // Calculate for 30 days (4 payments)
+                const thirtyWeeklyPayment = totalBalance / 4;
+                document.getElementById('thirtyWeeklyPayment').textContent = `$${thirtyWeeklyPayment.toFixed(2)}`;
+                document.getElementById('thirtyWeeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 60 days (8 payments)
+                const sixtyWeeklyPayment = totalBalance / 8;
+                document.getElementById('sixtyWeeklyPayment').textContent = `$${sixtyWeeklyPayment.toFixed(2)}`;
+                document.getElementById('sixtyWeeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 90 days (12 payments)
+                const ninetyWeeklyPayment = totalBalance / 12;
+                document.getElementById('ninetyWeeklyPayment').textContent = `$${ninetyWeeklyPayment.toFixed(2)}`;
+                document.getElementById('ninetyWeeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Calculate for 1 year (52 payments)
+                const yearWeeklyPayment = totalBalance / 52;
+                document.getElementById('yearWeeklyPayment').textContent = `$${yearWeeklyPayment.toFixed(2)}`;
+                document.getElementById('yearWeeklyTotal').textContent = `$${totalBalance.toFixed(2)}`;
+                
+                // Check if any payment is below minimum
+                if (yearWeeklyPayment < minWeeklyPayment) {
+                    document.getElementById('yearWeeklyRow').style.color = '#e74c3c';
+                    warning += "• The 1-year weekly plan falls below the minimum payment (equivalent to $50/month).<br>";
+                } else {
+                    document.getElementById('yearWeeklyRow').style.color = '';
+                }
+                
+                if (ninetyWeeklyPayment < minWeeklyPayment) {
+                    document.getElementById('ninetyWeeklyRow').style.color = '#e74c3c';
+                    warning += "• The 90-day weekly plan falls below the minimum payment.<br>";
+                } else {
+                    document.getElementById('ninetyWeeklyRow').style.color = '';
+                }
+                
+                if (sixtyWeeklyPayment < minWeeklyPayment) {
+                    document.getElementById('sixtyWeeklyRow').style.color = '#e74c3c';
+                    warning += "• The 60-day weekly plan falls below the minimum payment.<br>";
+                } else {
+                    document.getElementById('sixtyWeeklyRow').style.color = '';
+                }
+                
+                if (thirtyWeeklyPayment < minWeeklyPayment) {
+                    document.getElementById('thirtyWeeklyRow').style.color = '#e74c3c';
+                    warning += "• The 30-day weekly plan falls below the minimum payment.<br>";
+                } else {
+                    document.getElementById('thirtyWeeklyRow').style.color = '';
+                }
             }
             
             if (warning !== "") {
@@ -260,6 +468,13 @@
             
             document.getElementById('paymentsResult').style.display = 'block';
         }
+        
+        // Initialize by setting the default frequency to monthly
+        document.getElementById('paymentFrequency').addEventListener('change', function() {
+            if (document.getElementById('paymentsResult').style.display !== 'none') {
+                calculatePayments();
+            }
+        });
     </script>
 </body>
 </html>
