@@ -51,6 +51,14 @@
             border-radius: 6px;
             font-size: 16px;
         }
+        select.term-select {
+            width: 100%;
+            padding: 8px;
+            margin: 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
         button {
             background-color: #3498db;
             color: white;
@@ -90,6 +98,11 @@
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
+        td.term-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         th {
             background-color: #f2f2f2;
             font-weight: 600;
@@ -127,6 +140,14 @@
             }
             .calculator {
                 padding: 15px;
+            }
+            td.term-cell {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+            select.term-select {
+                width: 100%;
             }
         }
     </style>
@@ -197,11 +218,23 @@
                             <td id="ninetyFinal">$0.00</td>
                             <td id="ninetyTotal">$0.00</td>
                         </tr>
-                        <tr id="yearRow">
-                            <td>1 year (12 months)</td>
-                            <td id="yearPayment">$0.00</td>
-                            <td id="yearFinal">$0.00</td>
-                            <td id="yearTotal">$0.00</td>
+                        <tr id="customTermRow">
+                            <td class="term-cell">
+                                <select id="customTermSelect" class="term-select" onchange="updateCustomTerm('monthly')">
+                                    <option value="3">3 months</option>
+                                    <option value="6">6 months</option>
+                                    <option value="9">9 months</option>
+                                    <option value="12" selected>1 year (12 months)</option>
+                                    <option value="18">18 months</option>
+                                    <option value="24">2 years (24 months)</option>
+                                    <option value="36">3 years (36 months)</option>
+                                    <option value="48">4 years (48 months)</option>
+                                    <option value="60">5 years (60 months)</option>
+                                </select>
+                            </td>
+                            <td id="customTermPayment">$0.00</td>
+                            <td id="customTermFinal">$0.00</td>
+                            <td id="customTermTotal">$0.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -236,11 +269,23 @@
                             <td id="ninetyBiweeklyFinal">$0.00</td>
                             <td id="ninetyBiweeklyTotal">$0.00</td>
                         </tr>
-                        <tr id="yearBiweeklyRow">
-                            <td>1 year (26 payments)</td>
-                            <td id="yearBiweeklyPayment">$0.00</td>
-                            <td id="yearBiweeklyFinal">$0.00</td>
-                            <td id="yearBiweeklyTotal">$0.00</td>
+                        <tr id="customTermBiweeklyRow">
+                            <td class="term-cell">
+                                <select id="customTermBiweeklySelect" class="term-select" onchange="updateCustomTerm('biweekly')">
+                                    <option value="3">3 months (6 payments)</option>
+                                    <option value="6">6 months (13 payments)</option>
+                                    <option value="9">9 months (19 payments)</option>
+                                    <option value="12" selected>1 year (26 payments)</option>
+                                    <option value="18">18 months (39 payments)</option>
+                                    <option value="24">2 years (52 payments)</option>
+                                    <option value="36">3 years (78 payments)</option>
+                                    <option value="48">4 years (104 payments)</option>
+                                    <option value="60">5 years (130 payments)</option>
+                                </select>
+                            </td>
+                            <td id="customTermBiweeklyPayment">$0.00</td>
+                            <td id="customTermBiweeklyFinal">$0.00</td>
+                            <td id="customTermBiweeklyTotal">$0.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -275,11 +320,23 @@
                             <td id="ninetyWeeklyFinal">$0.00</td>
                             <td id="ninetyWeeklyTotal">$0.00</td>
                         </tr>
-                        <tr id="yearWeeklyRow">
-                            <td>1 year (52 payments)</td>
-                            <td id="yearWeeklyPayment">$0.00</td>
-                            <td id="yearWeeklyFinal">$0.00</td>
-                            <td id="yearWeeklyTotal">$0.00</td>
+                        <tr id="customTermWeeklyRow">
+                            <td class="term-cell">
+                                <select id="customTermWeeklySelect" class="term-select" onchange="updateCustomTerm('weekly')">
+                                    <option value="3">3 months (13 payments)</option>
+                                    <option value="6">6 months (26 payments)</option>
+                                    <option value="9">9 months (39 payments)</option>
+                                    <option value="12" selected>1 year (52 payments)</option>
+                                    <option value="18">18 months (78 payments)</option>
+                                    <option value="24">2 years (104 payments)</option>
+                                    <option value="36">3 years (156 payments)</option>
+                                    <option value="48">4 years (208 payments)</option>
+                                    <option value="60">5 years (260 payments)</option>
+                                </select>
+                            </td>
+                            <td id="customTermWeeklyPayment">$0.00</td>
+                            <td id="customTermWeeklyFinal">$0.00</td>
+                            <td id="customTermWeeklyTotal">$0.00</td>
                         </tr>
                     </tbody>
                 </table>
@@ -331,6 +388,112 @@
             };
         }
         
+        // Get number of payments for a given frequency and months
+        function getNumberOfPayments(frequency, months) {
+            switch(frequency) {
+                case 'monthly':
+                    return months;
+                case 'biweekly':
+                    // Approximately 26 payments per year (2.17 per month)
+                    return Math.round(months * (26/12));
+                case 'weekly':
+                    // Approximately 4.33 weeks per month
+                    return Math.round(months * 4.33);
+                default:
+                    return months;
+            }
+        }
+        
+        // Update custom term calculations
+        function updateCustomTerm(frequency) {
+            const totalBalance = parseFloat(document.getElementById('paymentAmount').value);
+            
+            if (isNaN(totalBalance)) {
+                return; // Don't update if there's no valid balance
+            }
+            
+            let months, selectId;
+            
+            if (frequency === 'monthly') {
+                selectId = 'customTermSelect';
+            } else if (frequency === 'biweekly') {
+                selectId = 'customTermBiweeklySelect';
+            } else {
+                selectId = 'customTermWeeklySelect';
+            }
+            
+            months = parseInt(document.getElementById(selectId).value);
+            
+            const numPayments = getNumberOfPayments(frequency, months);
+            const customTerm = calculateExactPayments(totalBalance, numPayments);
+            
+            // Update the UI with calculated values
+            if (frequency === 'monthly') {
+                document.getElementById('customTermPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
+                document.getElementById('customTermFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
+                document.getElementById('customTermTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
+                document.getElementById('customTermFinal').className = customTerm.isDifferent ? 'different-final' : '';
+                
+                // Check if below minimum payment
+                if (customTerm.regularPayment < 50) {
+                    document.getElementById('customTermRow').style.color = '#e74c3c';
+                } else {
+                    document.getElementById('customTermRow').style.color = '';
+                }
+            } else if (frequency === 'biweekly') {
+                document.getElementById('customTermBiweeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
+                document.getElementById('customTermBiweeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
+                document.getElementById('customTermBiweeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
+                document.getElementById('customTermBiweeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
+                
+                // Check if below minimum payment (converted to biweekly)
+                if (customTerm.regularPayment < (50 / 2.17)) {
+                    document.getElementById('customTermBiweeklyRow').style.color = '#e74c3c';
+                } else {
+                    document.getElementById('customTermBiweeklyRow').style.color = '';
+                }
+            } else {
+                document.getElementById('customTermWeeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
+                document.getElementById('customTermWeeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
+                document.getElementById('customTermWeeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
+                document.getElementById('customTermWeeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
+                
+                // Check if below minimum payment (converted to weekly)
+                if (customTerm.regularPayment < (50 / 4.33)) {
+                    document.getElementById('customTermWeeklyRow').style.color = '#e74c3c';
+                } else {
+                    document.getElementById('customTermWeeklyRow').style.color = '';
+                }
+            }
+            
+            // Update warning message if needed
+            updateWarningMessage(frequency);
+        }
+        
+        function updateWarningMessage(frequency) {
+            // Get all the current warning elements
+            const warningElements = document.querySelectorAll(`#${frequency}Tab tr[style*="color: rgb(231, 76, 60)"]`);
+            
+            let warning = "";
+            
+            // Generate warning messages based on which rows are highlighted
+            warningElements.forEach(row => {
+                const termText = row.cells[0].textContent.trim();
+                const termDesc = row.cells[0].querySelector('select') ? 
+                    row.cells[0].querySelector('select').options[row.cells[0].querySelector('select').selectedIndex].text :
+                    termText;
+                
+                warning += `• The ${termDesc} plan falls below the minimum payment.<br>`;
+            });
+            
+            if (warning !== "") {
+                document.getElementById('warningMessage').innerHTML = "Warning:<br>" + warning;
+                document.getElementById('warningMessage').style.display = 'block';
+            } else {
+                document.getElementById('warningMessage').style.display = 'none';
+            }
+        }
+        
         function calculatePayments() {
             const totalBalance = parseFloat(document.getElementById('paymentAmount').value);
             const minMonthlyPayment = 50;
@@ -376,38 +539,35 @@
                 document.getElementById('ninetyTotal').textContent = `$${ninetyDays.totalPayments.toFixed(2)}`;
                 document.getElementById('ninetyFinal').className = ninetyDays.isDifferent ? 'different-final' : '';
                 
-                // Calculate for 1 year (12 months)
-                const yearDays = calculateExactPayments(totalBalance, 12);
-                document.getElementById('yearPayment').textContent = `$${yearDays.regularPayment.toFixed(2)}`;
-                document.getElementById('yearFinal').textContent = `$${yearDays.finalPayment.toFixed(2)}`;
-                document.getElementById('yearTotal').textContent = `$${yearDays.totalPayments.toFixed(2)}`;
-                document.getElementById('yearFinal').className = yearDays.isDifferent ? 'different-final' : '';
+                // Calculate custom term
+                const customTermMonths = parseInt(document.getElementById('customTermSelect').value);
+                const customTerm = calculateExactPayments(totalBalance, customTermMonths);
+                document.getElementById('customTermPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
+                document.getElementById('customTermFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
+                document.getElementById('customTermTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
+                document.getElementById('customTermFinal').className = customTerm.isDifferent ? 'different-final' : '';
                 
                 // Check if any payment is below minimum and show warning
-                if (yearDays.regularPayment < minMonthlyPayment) {
-                    document.getElementById('yearRow').style.color = '#e74c3c';
-                    warning += "• The 12-month plan falls below the $50 minimum monthly payment.<br>";
+                if (customTerm.regularPayment < minMonthlyPayment) {
+                    document.getElementById('customTermRow').style.color = '#e74c3c';
                 } else {
-                    document.getElementById('yearRow').style.color = '';
+                    document.getElementById('customTermRow').style.color = '';
                 }
                 
                 if (ninetyDays.regularPayment < minMonthlyPayment) {
                     document.getElementById('ninetyRow').style.color = '#e74c3c';
-                    warning += "• The 3-month plan falls below the $50 minimum monthly payment.<br>";
                 } else {
                     document.getElementById('ninetyRow').style.color = '';
                 }
                 
                 if (sixtyDays.regularPayment < minMonthlyPayment) {
                     document.getElementById('sixtyRow').style.color = '#e74c3c';
-                    warning += "• The 2-month plan falls below the $50 minimum monthly payment.<br>";
                 } else {
                     document.getElementById('sixtyRow').style.color = '';
                 }
                 
                 if (thirtyDays.regularPayment < minMonthlyPayment) {
                     document.getElementById('thirtyRow').style.color = '#e74c3c';
-                    warning += "• The 1-month payment falls below the $50 minimum.<br>";
                 } else {
                     document.getElementById('thirtyRow').style.color = '';
                 }
@@ -437,38 +597,36 @@
                 document.getElementById('ninetyBiweeklyTotal').textContent = `$${ninetyBiweekly.totalPayments.toFixed(2)}`;
                 document.getElementById('ninetyBiweeklyFinal').className = ninetyBiweekly.isDifferent ? 'different-final' : '';
                 
-                // Calculate for 1 year (26 payments)
-                const yearBiweekly = calculateExactPayments(totalBalance, 26);
-                document.getElementById('yearBiweeklyPayment').textContent = `$${yearBiweekly.regularPayment.toFixed(2)}`;
-                document.getElementById('yearBiweeklyFinal').textContent = `$${yearBiweekly.finalPayment.toFixed(2)}`;
-                document.getElementById('yearBiweeklyTotal').textContent = `$${yearBiweekly.totalPayments.toFixed(2)}`;
-                document.getElementById('yearBiweeklyFinal').className = yearBiweekly.isDifferent ? 'different-final' : '';
+                // Calculate custom term
+                const customTermMonths = parseInt(document.getElementById('customTermBiweeklySelect').value);
+                const customTermPayments = getNumberOfPayments('biweekly', customTermMonths);
+                const customTerm = calculateExactPayments(totalBalance, customTermPayments);
+                document.getElementById('customTermBiweeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
+                document.getElementById('customTermBiweeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
+                document.getElementById('customTermBiweeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
+                document.getElementById('customTermBiweeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
                 
                 // Check if any payment is below minimum
-                if (yearBiweekly.regularPayment < minBiweeklyPayment) {
-                    document.getElementById('yearBiweeklyRow').style.color = '#e74c3c';
-                    warning += "• The 1-year bi-weekly plan falls below the minimum payment (equivalent to $50/month).<br>";
+                if (customTerm.regularPayment < minBiweeklyPayment) {
+                    document.getElementById('customTermBiweeklyRow').style.color = '#e74c3c';
                 } else {
-                    document.getElementById('yearBiweeklyRow').style.color = '';
+                    document.getElementById('customTermBiweeklyRow').style.color = '';
                 }
                 
                 if (ninetyBiweekly.regularPayment < minBiweeklyPayment) {
                     document.getElementById('ninetyBiweeklyRow').style.color = '#e74c3c';
-                    warning += "• The 90-day bi-weekly plan falls below the minimum payment.<br>";
                 } else {
                     document.getElementById('ninetyBiweeklyRow').style.color = '';
                 }
                 
                 if (sixtyBiweekly.regularPayment < minBiweeklyPayment) {
                     document.getElementById('sixtyBiweeklyRow').style.color = '#e74c3c';
-                    warning += "• The 60-day bi-weekly plan falls below the minimum payment.<br>";
                 } else {
                     document.getElementById('sixtyBiweeklyRow').style.color = '';
                 }
                 
                 if (thirtyBiweekly.regularPayment < minBiweeklyPayment) {
                     document.getElementById('thirtyBiweeklyRow').style.color = '#e74c3c';
-                    warning += "• The 30-day bi-weekly plan falls below the minimum payment.<br>";
                 } else {
                     document.getElementById('thirtyBiweeklyRow').style.color = '';
                 }
@@ -498,56 +656,68 @@
                 document.getElementById('ninetyWeeklyTotal').textContent = `$${ninetyWeekly.totalPayments.toFixed(2)}`;
                 document.getElementById('ninetyWeeklyFinal').className = ninetyWeekly.isDifferent ? 'different-final' : '';
                 
-                // Calculate for 1 year (52 payments)
-                const yearWeekly = calculateExactPayments(totalBalance, 52);
-                document.getElementById('yearWeeklyPayment').textContent = `$${yearWeekly.regularPayment.toFixed(2)}`;
-                document.getElementById('yearWeeklyFinal').textContent = `$${yearWeekly.finalPayment.toFixed(2)}`;
-                document.getElementById('yearWeeklyTotal').textContent = `$${yearWeekly.totalPayments.toFixed(2)}`;
-                document.getElementById('yearWeeklyFinal').className = yearWeekly.isDifferent ? 'different-final' : '';
+                // Calculate custom term
+                const customTermMonths = parseInt(document.getElementById('customTermWeeklySelect').value);
+                const customTermPayments = getNumberOfPayments('weekly', customTermMonths);
+                const customTerm = calculateExactPayments(totalBalance, customTermPayments);
+                document.getElementById('customTermWeeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
+                document.getElementById('customTermWeeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
+                document.getElementById('customTermWeeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
+                document.getElementById('customTermWeeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
                 
                 // Check if any payment is below minimum
-                if (yearWeekly.regularPayment < minWeeklyPayment) {
-                    document.getElementById('yearWeeklyRow').style.color = '#e74c3c';
-                    warning += "• The 1-year weekly plan falls below the minimum payment (equivalent to $50/month).<br>";
+                if (customTerm.regularPayment < minWeeklyPayment) {
+                    document.getElementById('customTermWeeklyRow').style.color = '#e74c3c';
                 } else {
-                    document.getElementById('yearWeeklyRow').style.color = '';
+                    document.getElementById('customTermWeeklyRow').style.color = '';
                 }
                 
                 if (ninetyWeekly.regularPayment < minWeeklyPayment) {
                     document.getElementById('ninetyWeeklyRow').style.color = '#e74c3c';
-                    warning += "• The 90-day weekly plan falls below the minimum payment.<br>";
                 } else {
                     document.getElementById('ninetyWeeklyRow').style.color = '';
                 }
                 
                 if (sixtyWeekly.regularPayment < minWeeklyPayment) {
                     document.getElementById('sixtyWeeklyRow').style.color = '#e74c3c';
-                    warning += "• The 60-day weekly plan falls below the minimum payment.<br>";
                 } else {
                     document.getElementById('sixtyWeeklyRow').style.color = '';
                 }
                 
                 if (thirtyWeekly.regularPayment < minWeeklyPayment) {
                     document.getElementById('thirtyWeeklyRow').style.color = '#e74c3c';
-                    warning += "• The 30-day weekly plan falls below the minimum payment.<br>";
                 } else {
                     document.getElementById('thirtyWeeklyRow').style.color = '';
                 }
             }
             
-            if (warning !== "") {
-                document.getElementById('warningMessage').innerHTML = "Warning:<br>" + warning;
-                document.getElementById('warningMessage').style.display = 'block';
-            }
+            // Update warning messages
+            updateWarningMessage(frequency);
             
             document.getElementById('paymentsResult').style.display = 'block';
         }
         
-        // Initialize by setting the default frequency to monthly
-        document.getElementById('paymentFrequency').addEventListener('change', function() {
-            if (document.getElementById('paymentsResult').style.display !== 'none') {
-                calculatePayments();
-            }
+        // Initialize event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize frequency change
+            document.getElementById('paymentFrequency').addEventListener('change', function() {
+                if (document.getElementById('paymentsResult').style.display !== 'none') {
+                    calculatePayments();
+                }
+            });
+            
+            // Initialize custom term selects
+            document.getElementById('customTermSelect').addEventListener('change', function() {
+                updateCustomTerm('monthly');
+            });
+            
+            document.getElementById('customTermBiweeklySelect').addEventListener('change', function() {
+                updateCustomTerm('biweekly');
+            });
+            
+            document.getElementById('customTermWeeklySelect').addEventListener('change', function() {
+                updateCustomTerm('weekly');
+            });
         });
     </script>
 </body>
