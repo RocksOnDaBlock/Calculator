@@ -107,6 +107,12 @@
             background-color: #f2f2f2;
             font-weight: 600;
         }
+        .payment-count {
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            display: block;
+            margin-top: 3px;
+        }
         .warning {
             color: #e74c3c;
             font-weight: bold;
@@ -380,11 +386,17 @@
             
             const totalPayments = (regularPayment * (numPayments - 1)) + finalPayment;
             
+            // Calculate number of regular and final payments
+            const numRegularPayments = remainderCents > 0 ? numPayments - 1 : numPayments;
+            const numFinalPayments = remainderCents > 0 ? 1 : 0;
+            
             return {
                 regularPayment: regularPayment,
                 finalPayment: finalPayment,
                 totalPayments: totalPayments,
-                isDifferent: remainderCents > 0
+                isDifferent: remainderCents > 0,
+                numRegularPayments: numRegularPayments,
+                numFinalPayments: numFinalPayments
             };
         }
         
@@ -404,6 +416,47 @@
             }
         }
         
+        // Helper function to update payment display
+        function updatePaymentDisplay(idPrefix, paymentInfo) {
+            // Regular Payment
+            const regularPaymentElement = document.getElementById(`${idPrefix}Payment`);
+            regularPaymentElement.textContent = `$${paymentInfo.regularPayment.toFixed(2)}`;
+            
+            // Clear existing payment count label if any
+            if (regularPaymentElement.querySelector('.payment-count')) {
+                regularPaymentElement.querySelector('.payment-count').remove();
+            }
+            
+            // Add payment count to regular payments if there's a different final payment
+            if (paymentInfo.isDifferent) {
+                const regularCountLabel = document.createElement('span');
+                regularCountLabel.className = 'payment-count';
+                regularCountLabel.textContent = `(${paymentInfo.numRegularPayments} payments)`;
+                regularPaymentElement.appendChild(regularCountLabel);
+            }
+            
+            // Final Payment
+            const finalPaymentElement = document.getElementById(`${idPrefix}Final`);
+            finalPaymentElement.textContent = `$${paymentInfo.finalPayment.toFixed(2)}`;
+            finalPaymentElement.className = paymentInfo.isDifferent ? 'different-final' : '';
+            
+            // Clear existing payment count label if any
+            if (finalPaymentElement.querySelector('.payment-count')) {
+                finalPaymentElement.querySelector('.payment-count').remove();
+            }
+            
+            // Add payment count to final payment if different
+            if (paymentInfo.isDifferent) {
+                const finalCountLabel = document.createElement('span');
+                finalCountLabel.className = 'payment-count';
+                finalCountLabel.textContent = `(1 payment)`;
+                finalPaymentElement.appendChild(finalCountLabel);
+            }
+            
+            // Total
+            document.getElementById(`${idPrefix}Total`).textContent = `$${paymentInfo.totalPayments.toFixed(2)}`;
+        }
+        
         // Update custom term calculations
         function updateCustomTerm(frequency) {
             const totalBalance = parseFloat(document.getElementById('paymentAmount').value);
@@ -412,14 +465,20 @@
                 return; // Don't update if there's no valid balance
             }
             
-            let months, selectId;
+            let months, selectId, rowId, idPrefix;
             
             if (frequency === 'monthly') {
                 selectId = 'customTermSelect';
+                rowId = 'customTermRow';
+                idPrefix = 'customTerm';
             } else if (frequency === 'biweekly') {
                 selectId = 'customTermBiweeklySelect';
+                rowId = 'customTermBiweeklyRow';
+                idPrefix = 'customTermBiweekly';
             } else {
                 selectId = 'customTermWeeklySelect';
+                rowId = 'customTermWeeklyRow';
+                idPrefix = 'customTermWeekly';
             }
             
             months = parseInt(document.getElementById(selectId).value);
@@ -428,45 +487,27 @@
             const customTerm = calculateExactPayments(totalBalance, numPayments);
             
             // Update the UI with calculated values
+            updatePaymentDisplay(idPrefix, customTerm);
+            
+            // Check if payment is below minimum
+            const minMonthlyPayment = 50;
+            let minPayment;
+            
             if (frequency === 'monthly') {
-                document.getElementById('customTermPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
-                document.getElementById('customTermFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
-                document.getElementById('customTermTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
-                document.getElementById('customTermFinal').className = customTerm.isDifferent ? 'different-final' : '';
-                
-                // Check if below minimum payment
-                if (customTerm.regularPayment < 50) {
-                    document.getElementById('customTermRow').style.color = '#e74c3c';
-                } else {
-                    document.getElementById('customTermRow').style.color = '';
-                }
+                minPayment = minMonthlyPayment;
             } else if (frequency === 'biweekly') {
-                document.getElementById('customTermBiweeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
-                document.getElementById('customTermBiweeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
-                document.getElementById('customTermBiweeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
-                document.getElementById('customTermBiweeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
-                
-                // Check if below minimum payment (converted to biweekly)
-                if (customTerm.regularPayment < (50 / 2.17)) {
-                    document.getElementById('customTermBiweeklyRow').style.color = '#e74c3c';
-                } else {
-                    document.getElementById('customTermBiweeklyRow').style.color = '';
-                }
+                minPayment = minMonthlyPayment / 2.17;
             } else {
-                document.getElementById('customTermWeeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
-                document.getElementById('customTermWeeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
-                document.getElementById('customTermWeeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
-                document.getElementById('customTermWeeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
-                
-                // Check if below minimum payment (converted to weekly)
-                if (customTerm.regularPayment < (50 / 4.33)) {
-                    document.getElementById('customTermWeeklyRow').style.color = '#e74c3c';
-                } else {
-                    document.getElementById('customTermWeeklyRow').style.color = '';
-                }
+                minPayment = minMonthlyPayment / 4.33;
             }
             
-            // Update warning message if needed
+            if (customTerm.regularPayment < minPayment) {
+                document.getElementById(rowId).style.color = '#e74c3c';
+            } else {
+                document.getElementById(rowId).style.color = '';
+            }
+            
+            // Update warning message
             updateWarningMessage(frequency);
         }
         
@@ -514,38 +555,24 @@
             // Show the selected tab
             document.getElementById(`${frequency}Tab`).classList.add('active');
             
-            let warning = "";
-
             // Calculate monthly payments
             if (frequency === 'monthly') {
                 // Calculate for 30 days (1 month)
                 const thirtyDays = calculateExactPayments(totalBalance, 1);
-                document.getElementById('thirtyPayment').textContent = `$${thirtyDays.regularPayment.toFixed(2)}`;
-                document.getElementById('thirtyFinal').textContent = `$${thirtyDays.finalPayment.toFixed(2)}`;
-                document.getElementById('thirtyTotal').textContent = `$${thirtyDays.totalPayments.toFixed(2)}`;
-                document.getElementById('thirtyFinal').className = thirtyDays.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('thirty', thirtyDays);
                 
                 // Calculate for 60 days (2 months)
                 const sixtyDays = calculateExactPayments(totalBalance, 2);
-                document.getElementById('sixtyPayment').textContent = `$${sixtyDays.regularPayment.toFixed(2)}`;
-                document.getElementById('sixtyFinal').textContent = `$${sixtyDays.finalPayment.toFixed(2)}`;
-                document.getElementById('sixtyTotal').textContent = `$${sixtyDays.totalPayments.toFixed(2)}`;
-                document.getElementById('sixtyFinal').className = sixtyDays.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('sixty', sixtyDays);
                 
                 // Calculate for 90 days (3 months)
                 const ninetyDays = calculateExactPayments(totalBalance, 3);
-                document.getElementById('ninetyPayment').textContent = `$${ninetyDays.regularPayment.toFixed(2)}`;
-                document.getElementById('ninetyFinal').textContent = `$${ninetyDays.finalPayment.toFixed(2)}`;
-                document.getElementById('ninetyTotal').textContent = `$${ninetyDays.totalPayments.toFixed(2)}`;
-                document.getElementById('ninetyFinal').className = ninetyDays.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('ninety', ninetyDays);
                 
                 // Calculate custom term
                 const customTermMonths = parseInt(document.getElementById('customTermSelect').value);
                 const customTerm = calculateExactPayments(totalBalance, customTermMonths);
-                document.getElementById('customTermPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
-                document.getElementById('customTermFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
-                document.getElementById('customTermTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
-                document.getElementById('customTermFinal').className = customTerm.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('customTerm', customTerm);
                 
                 // Check if any payment is below minimum and show warning
                 if (customTerm.regularPayment < minMonthlyPayment) {
@@ -578,33 +605,21 @@
                 
                 // Calculate for 30 days (2 payments)
                 const thirtyBiweekly = calculateExactPayments(totalBalance, 2);
-                document.getElementById('thirtyBiweeklyPayment').textContent = `$${thirtyBiweekly.regularPayment.toFixed(2)}`;
-                document.getElementById('thirtyBiweeklyFinal').textContent = `$${thirtyBiweekly.finalPayment.toFixed(2)}`;
-                document.getElementById('thirtyBiweeklyTotal').textContent = `$${thirtyBiweekly.totalPayments.toFixed(2)}`;
-                document.getElementById('thirtyBiweeklyFinal').className = thirtyBiweekly.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('thirtyBiweekly', thirtyBiweekly);
                 
                 // Calculate for 60 days (4 payments)
                 const sixtyBiweekly = calculateExactPayments(totalBalance, 4);
-                document.getElementById('sixtyBiweeklyPayment').textContent = `$${sixtyBiweekly.regularPayment.toFixed(2)}`;
-                document.getElementById('sixtyBiweeklyFinal').textContent = `$${sixtyBiweekly.finalPayment.toFixed(2)}`;
-                document.getElementById('sixtyBiweeklyTotal').textContent = `$${sixtyBiweekly.totalPayments.toFixed(2)}`;
-                document.getElementById('sixtyBiweeklyFinal').className = sixtyBiweekly.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('sixtyBiweekly', sixtyBiweekly);
                 
                 // Calculate for 90 days (6 payments)
                 const ninetyBiweekly = calculateExactPayments(totalBalance, 6);
-                document.getElementById('ninetyBiweeklyPayment').textContent = `$${ninetyBiweekly.regularPayment.toFixed(2)}`;
-                document.getElementById('ninetyBiweeklyFinal').textContent = `$${ninetyBiweekly.finalPayment.toFixed(2)}`;
-                document.getElementById('ninetyBiweeklyTotal').textContent = `$${ninetyBiweekly.totalPayments.toFixed(2)}`;
-                document.getElementById('ninetyBiweeklyFinal').className = ninetyBiweekly.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('ninetyBiweekly', ninetyBiweekly);
                 
                 // Calculate custom term
                 const customTermMonths = parseInt(document.getElementById('customTermBiweeklySelect').value);
                 const customTermPayments = getNumberOfPayments('biweekly', customTermMonths);
                 const customTerm = calculateExactPayments(totalBalance, customTermPayments);
-                document.getElementById('customTermBiweeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
-                document.getElementById('customTermBiweeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
-                document.getElementById('customTermBiweeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
-                document.getElementById('customTermBiweeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('customTermBiweekly', customTerm);
                 
                 // Check if any payment is below minimum
                 if (customTerm.regularPayment < minBiweeklyPayment) {
@@ -637,33 +652,21 @@
                 
                 // Calculate for 30 days (4 payments)
                 const thirtyWeekly = calculateExactPayments(totalBalance, 4);
-                document.getElementById('thirtyWeeklyPayment').textContent = `$${thirtyWeekly.regularPayment.toFixed(2)}`;
-                document.getElementById('thirtyWeeklyFinal').textContent = `$${thirtyWeekly.finalPayment.toFixed(2)}`;
-                document.getElementById('thirtyWeeklyTotal').textContent = `$${thirtyWeekly.totalPayments.toFixed(2)}`;
-                document.getElementById('thirtyWeeklyFinal').className = thirtyWeekly.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('thirtyWeekly', thirtyWeekly);
                 
                 // Calculate for 60 days (8 payments)
                 const sixtyWeekly = calculateExactPayments(totalBalance, 8);
-                document.getElementById('sixtyWeeklyPayment').textContent = `$${sixtyWeekly.regularPayment.toFixed(2)}`;
-                document.getElementById('sixtyWeeklyFinal').textContent = `$${sixtyWeekly.finalPayment.toFixed(2)}`;
-                document.getElementById('sixtyWeeklyTotal').textContent = `$${sixtyWeekly.totalPayments.toFixed(2)}`;
-                document.getElementById('sixtyWeeklyFinal').className = sixtyWeekly.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('sixtyWeekly', sixtyWeekly);
                 
                 // Calculate for 90 days (12 payments)
                 const ninetyWeekly = calculateExactPayments(totalBalance, 12);
-                document.getElementById('ninetyWeeklyPayment').textContent = `$${ninetyWeekly.regularPayment.toFixed(2)}`;
-                document.getElementById('ninetyWeeklyFinal').textContent = `$${ninetyWeekly.finalPayment.toFixed(2)}`;
-                document.getElementById('ninetyWeeklyTotal').textContent = `$${ninetyWeekly.totalPayments.toFixed(2)}`;
-                document.getElementById('ninetyWeeklyFinal').className = ninetyWeekly.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('ninetyWeekly', ninetyWeekly);
                 
                 // Calculate custom term
                 const customTermMonths = parseInt(document.getElementById('customTermWeeklySelect').value);
                 const customTermPayments = getNumberOfPayments('weekly', customTermMonths);
                 const customTerm = calculateExactPayments(totalBalance, customTermPayments);
-                document.getElementById('customTermWeeklyPayment').textContent = `$${customTerm.regularPayment.toFixed(2)}`;
-                document.getElementById('customTermWeeklyFinal').textContent = `$${customTerm.finalPayment.toFixed(2)}`;
-                document.getElementById('customTermWeeklyTotal').textContent = `$${customTerm.totalPayments.toFixed(2)}`;
-                document.getElementById('customTermWeeklyFinal').className = customTerm.isDifferent ? 'different-final' : '';
+                updatePaymentDisplay('customTermWeekly', customTerm);
                 
                 // Check if any payment is below minimum
                 if (customTerm.regularPayment < minWeeklyPayment) {
